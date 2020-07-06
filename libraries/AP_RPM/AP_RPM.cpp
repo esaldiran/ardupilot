@@ -206,6 +206,22 @@ bool AP_RPM::get_rpm(uint8_t instance, float &rpm_value) const
     return true;
 }
 
+/*
+  get RPM value of all motor
+  This is rather easy way to obtain motor RPM in SITL 
+ */
+bool AP_RPM::get_rpms(uint8_t instance, float* rpm_value)
+{
+    if (!healthy(instance)) {
+        return false;
+    }
+    memcpy(rpm_value, state[instance].rpm, sizeof(float) * 4);
+    // for ( uint8_t i = 0; i < 4; i++) {
+    //     rpm_value[i] = state[instance].rpm[i];
+    // }
+    return true;
+}
+
 // singleton instance
 AP_RPM *AP_RPM::_singleton;
 
