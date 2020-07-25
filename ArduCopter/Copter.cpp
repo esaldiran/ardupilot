@@ -265,6 +265,7 @@ void Copter::fast_loop()
     }
 
     AP_Vehicle::fast_loop();
+    indi_control->calculate_torque_thrust_est();
 }
 
 // start takeoff to given altitude (for use by scripting)
