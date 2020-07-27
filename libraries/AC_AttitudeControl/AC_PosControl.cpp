@@ -2,6 +2,7 @@
 #include "AC_PosControl.h"
 #include <AP_Math/AP_Math.h>
 #include <AP_Logger/AP_Logger.h>
+#include <AC_INDI_Control/AC_INDI_Control.h>
 
 extern const AP_HAL::HAL& hal;
 
@@ -656,8 +657,26 @@ void AC_PosControl::run_z_controller()
     }
     thr_out += _motors.get_throttle_hover();
 
-    // send throttle to attitude controller with angle boost
-    _attitude_control.set_throttle_out(thr_out, true, POSCONTROL_THROTTLE_CUTOFF_FREQ);
+    if (AP::indi_control().enabled()) {
+        // limit acceleration using maximum lean angles
+        float angle_max = MIN(_attitude_control.get_althold_lean_angle_max(), get_lean_angle_max_cd());
+        float accel_max_xy = MIN(GRAVITY_MSS * 100.0f * tanf(ToRad(angle_max * 0.01f)), POSCONTROL_ACCEL_XY_MAX) * 0.01f;
+
+        AP::indi_control().run_pos_vel_z_controller(_pos_target.z * 0.01f, curr_alt * 0.01f, _vel_desired.z * 0.01f, curr_vel.z * 0.01f, _accel_desired.z * 0.01f, is_active_xy(), accel_max_xy);
+        _attitude_control.set_throttle_out(AP::indi_control().get_total_thrust_cmd_scaled(), true, 0.0f);
+
+        if (is_active_xy()) {
+            Vector3f target_eul;
+            // TODO: can be written more neatly
+            AP::indi_control().input_acc_des_euler_angle_yaw(_ahrs.yaw).to_euler(target_eul.x, target_eul.y, target_eul.z);
+            _roll_target = constrain_float(RadiansToCentiDegrees(target_eul.x), -angle_max, angle_max);
+            _pitch_target = constrain_float(RadiansToCentiDegrees(target_eul.y), -angle_max, angle_max);
+            limit_vector_length(_roll_target, _pitch_target, angle_max);
+        }
+    } else {
+        // send throttle to attitude controller with angle boost
+        _attitude_control.set_throttle_out(thr_out, true, POSCONTROL_THROTTLE_CUTOFF_FREQ);
+    }
 
     // _speed_down_cms is checked to be non-zero when set
     float error_ratio = _vel_error.z/_speed_down_cms;
@@ -1109,6 +1128,10 @@ void AC_PosControl::run_xy_controller(float dt)
 
     // update angle targets that will be passed to stabilize controller
     accel_to_lean_angles(_accel_target.x, _accel_target.y, _roll_target, _pitch_target);
+
+    if (AP::indi_control().enabled()) {
+        AP::indi_control().run_pos_vel_xy_controller(_pos_target * 0.01f, curr_pos * 0.01f, _vel_desired * 0.01f, _inav.get_velocity() * 0.01f, _accel_desired * 0.01f);
+    }
 }
 
 // get_lean_angles_to_accel - convert roll, pitch lean angles to lat/lon frame accelerations in cm/s/s
