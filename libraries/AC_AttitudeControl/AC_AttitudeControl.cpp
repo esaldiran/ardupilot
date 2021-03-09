@@ -576,6 +576,11 @@ void AC_AttitudeControl::attitude_controller_run_quat()
         _rate_target_ang_vel.z += desired_ang_vel_quat.q4;
     }
 
+    if (AP::indi_control().enabled()) {
+        _rate_target_ang_vel = AP::indi_control().run_attitude_controller(_attitude_target_quat, attitude_vehicle_quat);
+        _rate_target_ang_vel += Vector3f(desired_ang_vel_quat.q2, desired_ang_vel_quat.q3, desired_ang_vel_quat.q4);
+    }
+
     if (_rate_bf_ff_enabled) {
         // rotate target and normalize
         Quaternion attitude_target_update_quat;
@@ -589,11 +594,6 @@ void AC_AttitudeControl::attitude_controller_run_quat()
 
     // Record error to handle EKF resets
     _attitude_ang_error = attitude_vehicle_quat.inverse() * _attitude_target_quat;
-
-    if (AP::indi_control().enabled()) {
-        _rate_target_ang_vel = AP::indi_control().run_attitude_controller(_attitude_target_quat, attitude_vehicle_quat);
-        _rate_target_ang_vel += Vector3f(desired_ang_vel_quat.q2, desired_ang_vel_quat.q3, desired_ang_vel_quat.q4);
-    }
 }
 
 // thrust_heading_rotation_angles - calculates two ordered rotations to move the att_from_quat quaternion to the att_to_quat quaternion.
