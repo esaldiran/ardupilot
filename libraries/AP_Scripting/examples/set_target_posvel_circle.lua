@@ -9,8 +9,8 @@
 --      4) switch out of and into the GUIDED mode any time to restart the trajectory from the start.
 
 -- Edit these variables
-local rad_xy_m = 10.0   -- circle radius in xy plane in m
-local target_speed_xy_mps = 5.0     -- maximum target speed in m/s
+local rad_xy_m = 5.0   -- circle radius in xy plane in m
+local target_speed_xy_mps = 10.0     -- maximum target speed in m/s
 local ramp_up_time_s = 10.0     -- time to reach target_speed_xy_mps in second
 local sampling_time_s = 0.05    -- sampling time of script
 
@@ -69,7 +69,11 @@ function update()
         end
     else 
         -- calculate test starting location in NED
+<<<<<<< HEAD
         local cur_loc = ahrs:get_location()        
+=======
+        local cur_loc = ahrs:get_position()        
+>>>>>>> AP_Scripting: set_target_posvel example script
         if cur_loc then
              test_start_location = cur_loc.get_vector_from_origin_NEU(cur_loc)             
              if test_start_location then
