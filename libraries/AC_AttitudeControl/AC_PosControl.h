@@ -306,6 +306,8 @@ public:
     // enable or disable high vibration compensation
     void set_vibe_comp(bool on_off) { _vibe_comp_enabled = on_off; }
 
+    void reset_desired_vel_to_pos(void) { _flags.reset_desired_vel_to_pos = true; }
+
     static const struct AP_Param::GroupInfo var_info[];
 
 protected:
