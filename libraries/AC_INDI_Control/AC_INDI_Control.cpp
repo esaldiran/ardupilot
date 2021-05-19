@@ -690,7 +690,7 @@ void AC_INDI_Control::write_log(void)
     const Vector3f &ang_vel = _ahrs.get_gyro();
     AP::logger().Write("IND3",
                         "TimeUS,TPX,TPY,TPZ,PX,PY,PZ,TVX,TVY,TVZ,VX,VY,VZ",
-                        "smmmmmmnnnnnn",
+                        "sddddddEEEEEE",
                         "F000000000000",
                         "Qffffffffffff",
                         AP_HAL::micros64(),
