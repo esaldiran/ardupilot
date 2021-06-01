@@ -662,6 +662,8 @@ void AC_PosControl::run_z_controller()
         float angle_max = MIN(_attitude_control.get_althold_lean_angle_max(), get_lean_angle_max_cd());
         float accel_max_xy = GRAVITY_MSS * tanf(ToRad(angle_max * 0.01f));
         
+        AP::indi_control().run_pos_vel_z_controller(_pos_target.z * 0.01f, curr_alt * 0.01f, _vel_desired.z * 0.01f, curr_vel.z * 0.01f, _accel_desired.z * 0.0f, is_active_xy(), accel_max_xy);
+
         if (is_active_xy()) {
             Vector3f target_eul;
             AP::indi_control().input_acc_des_euler_angle_yaw(_ahrs.yaw).to_euler(target_eul.x, target_eul.y, target_eul.z);
@@ -670,7 +672,6 @@ void AC_PosControl::run_z_controller()
             limit_vector_length(_roll_target, _pitch_target, angle_max);
             _attitude_control.set_throttle_out(AP::indi_control().get_total_thrust_cmd_scaled(), false, 0.0f);
         } else {
-            AP::indi_control().run_pos_vel_z_controller(_pos_target.z * 0.01f, curr_alt * 0.01f, _vel_desired.z * 0.01f, curr_vel.z * 0.01f, _accel_desired.z * 0.0f, is_active_xy(), accel_max_xy);
             _attitude_control.set_throttle_out(AP::indi_control().get_total_thrust_cmd_scaled(), true, 0.0f);
         }
     } else {
