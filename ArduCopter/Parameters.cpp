@@ -718,6 +718,10 @@ const AP_Param::Info Copter::var_info[] = {
     GOBJECT(osd, "OSD", AP_OSD),
 #endif
 
+#if CUSTOMCONTROL_ENABLED == ENABLED
+    GOBJECT(custom_control, "CSC_", AC_CustomControl),
+#endif
+
     // @Group:
     // @Path: Parameters.cpp
     GOBJECT(g2, "",  ParametersG2),

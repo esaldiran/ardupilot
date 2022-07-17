@@ -705,3 +705,7 @@
 #ifndef HAL_FRAME_TYPE_DEFAULT
 #define HAL_FRAME_TYPE_DEFAULT AP_Motors::MOTOR_FRAME_TYPE_X
 #endif
+
+#if CUSTOMCONTROL_ENABLED == ENABLED && FRAME_CONFIG == HELI_FRAME
+  #error Custom controller requires MULTI_FRAME
+#endif

@@ -46,6 +46,7 @@
 #include <AC_AttitudeControl/AC_AttitudeControl_Heli.h>         // Attitude control library for traditional helicopter
 #include <AC_AttitudeControl/AC_PosControl.h>                   // Position control library
 #include <AC_AttitudeControl/AC_CommandModel.h>                 // Command model library
+#include <AC_CustomControl/AC_CustomControl.h>      // Attitude control library
 #include <AP_Motors/AP_Motors.h>            // AP Motors library
 #include <AP_Stats/AP_Stats.h>              // statistics library
 #include <Filter/Filter.h>                  // Filter library
@@ -464,6 +465,10 @@ private:
     AC_WPNav *wp_nav;
     AC_Loiter *loiter_nav;
 
+#if CUSTOMCONTROL_ENABLED == ENABLED
+    AC_CustomControl custom_control{ahrs_view, attitude_control, motors, scheduler.get_loop_period_s()};
+#endif
+
 #if MODE_CIRCLE_ENABLED == ENABLED
     AC_Circle *circle_nav;
 #endif
@@ -686,6 +691,10 @@ private:
     void rotate_body_frame_to_NE(float &x, float &y);
     uint16_t get_pilot_speed_dn() const;
     void run_rate_controller() { attitude_control->rate_controller_run(); }
+
+#if CUSTOMCONTROL_ENABLED == ENABLED
+    void run_custom_controller() { custom_control.update(); }
+#endif
 
     // avoidance.cpp
     void low_alt_avoidance();

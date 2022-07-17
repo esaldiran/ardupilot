@@ -120,6 +120,7 @@ void RC_Channel_Copter::init_aux_function(const aux_func_t ch_option, const AuxS
     case AUX_FUNC::WINCH_ENABLE:
     case AUX_FUNC::AIRMODE:
     case AUX_FUNC::FORCEFLYING:
+    case AUX_FUNC::CUSTOM_CONTROLLER:
         run_aux_function(ch_option, ch_flag, AuxFuncTriggerSource::INIT);
         break;
     default:
@@ -609,6 +610,12 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
             if (copter.arming.is_armed()) {
                 copter.ap.armed_with_airmode_switch = true;
             }
+            break;
+
+        case AUX_FUNC::CUSTOM_CONTROLLER:
+#if CUSTOMCONTROL_ENABLED == ENABLED
+            copter.custom_control.set_custom_controller(ch_flag == AuxSwitchPos::HIGH);
+#endif
             break;
 
     default:
