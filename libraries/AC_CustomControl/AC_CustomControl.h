@@ -1,0 +1,73 @@
+#pragma once
+
+/// @file    AC_CustomControl.h
+/// @brief   ArduCopter custom control library
+
+#include <AP_Common/AP_Common.h>
+#include <AP_Param/AP_Param.h>
+#include <AP_Vehicle/AP_Vehicle.h>
+#include <AP_AHRS/AP_AHRS_View.h>
+#include <AC_AttitudeControl/AC_AttitudeControl_Multi.h>
+#include <AP_Motors/AP_Motors.h>
+
+#ifndef CUSTOMCONTROL_ENABLED
+#define CUSTOMCONTROL_ENABLED (!HAL_MINIMIZE_FEATURES && !defined(HAL_BUILD_AP_PERIPH) && BOARD_FLASH_SIZE > 1024 && 0)
+#endif
+
+#if CUSTOMCONTROL_ENABLED
+
+#ifndef CUSTOMCONTROL_MAX_TYPES
+#define CUSTOMCONTROL_MAX_TYPES 1
+#endif
+
+class AC_CustomControl_Backend;
+
+class AC_CustomControl {
+public:
+    AC_CustomControl(AP_AHRS_View*& ahrs, AC_AttitudeControl_Multi*& atti_control, AP_MotorsMulticopter*& motors, float dt);
+   
+    CLASS_NO_COPY(AC_CustomControl);  /* Do not allow copies */
+
+    void init(void);
+    void update(void);
+    void motor_set(Vector3f motor_out);
+    void set_custom_controller(bool enabled);
+    void reset_main_atti_controller(void);
+    bool is_safe_to_run(void);
+
+    // zero index controller type param, only use it to acces _backend or _backend_var_info array
+    uint8_t get_type() { return _controller_type > 0 ? (_controller_type - 1) : 0; };
+
+    // User settable parameters
+    static const struct AP_Param::GroupInfo var_info[];
+    static const struct AP_Param::GroupInfo *_backend_var_info[CUSTOMCONTROL_MAX_TYPES];
+
+protected:
+    // add custom controller here
+    enum class CustomControlType : uint8_t {
+        CONT_NONE            = 0,
+    };            // controller that should be used     
+
+    enum class  CustomControlOption {
+        ROLL = 1 << 0,
+        PITCH = 1 << 1,
+        YAW = 1 << 2,
+    };
+
+    // Intersampling period in seconds
+    float               _dt;
+    bool _custom_controller_active = false;
+
+    // References to external libraries
+    AP_AHRS_View *&_ahrs;
+    AC_AttitudeControl_Multi *&_atti_control;
+    AP_MotorsMulticopter  *&_motors;
+
+    AP_Enum<CustomControlType> _controller_type;
+    AP_Int8 _custom_controller_mask;
+
+private:
+    AC_CustomControl_Backend *_backend[CUSTOMCONTROL_MAX_TYPES];    
+};
+
+#endif
