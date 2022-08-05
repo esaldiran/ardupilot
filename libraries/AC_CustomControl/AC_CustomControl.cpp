@@ -6,13 +6,14 @@
 
 #include "AC_CustomControl_Backend.h"
 #include "AC_CustomControl_Empty.h"
+#include "AC_CustomControl_PID.h"
 
 // table of user settable parameters
 const AP_Param::GroupInfo AC_CustomControl::var_info[] = {
     // @Param: CONT_TYPE
     // @DisplayName: Attitude control type
     // @Description: Attitude control type to be used
-    // @Values: 0:None, 1:Empty
+    // @Values: 0:None, 1:Empty, 2:PID
     // @RebootRequired: True
     // @User: Advanced
     AP_GROUPINFO_FLAGS("CONT_TYPE", 1, AC_CustomControl, _controller_type, 0, AP_PARAM_FLAG_ENABLE),
@@ -26,6 +27,9 @@ const AP_Param::GroupInfo AC_CustomControl::var_info[] = {
 
     // parameters for empty controller
     AP_SUBGROUPVARPTR(_backend[0], "1_", 6, AC_CustomControl, _backend_var_info[0]),
+
+    // parameters for PID controller
+    AP_SUBGROUPVARPTR(_backend[1], "2_", 7, AC_CustomControl, _backend_var_info[1]),
 
     AP_GROUPEND
 };
@@ -50,6 +54,10 @@ void AC_CustomControl::init(void)
         case CustomControlType::CONT_EMPTY:
             _backend[get_type()] = new AC_CustomControl_Empty(*this, _ahrs, _atti_control, _motors, _dt);
             _backend_var_info[get_type()] = AC_CustomControl_Empty::var_info;
+            break;
+        case CustomControlType::CONT_PID:
+            _backend[get_type()] = new AC_CustomControl_PID(*this, _ahrs, _atti_control, _motors, _dt);
+            _backend_var_info[get_type()] = AC_CustomControl_PID::var_info;
             break;
         default:
             return;
