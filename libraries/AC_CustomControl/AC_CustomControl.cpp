@@ -5,13 +5,14 @@
 #if CUSTOMCONTROL_ENABLED
 
 #include "AC_CustomControl_Backend.h"
+#include "AC_CustomControl_Empty.h"
 
 // table of user settable parameters
 const AP_Param::GroupInfo AC_CustomControl::var_info[] = {
     // @Param: CONT_TYPE
     // @DisplayName: Attitude control type
     // @Description: Attitude control type to be used
-    // @Values: 0:None
+    // @Values: 0:None, 1:Empty
     // @RebootRequired: True
     // @User: Advanced
     AP_GROUPINFO_FLAGS("CONT_TYPE", 1, AC_CustomControl, _controller_type, 0, AP_PARAM_FLAG_ENABLE),
@@ -22,6 +23,9 @@ const AP_Param::GroupInfo AC_CustomControl::var_info[] = {
     // @Bitmask: 0:Roll, 1:Pitch, 2:Yaw
     // @User: Advanced
     AP_GROUPINFO("AXIS_MASK", 2, AC_CustomControl, _custom_controller_mask, 0),
+
+    // parameters for empty controller
+    AP_SUBGROUPVARPTR(_backend[0], "1_", 6, AC_CustomControl, _backend_var_info[0]),
 
     AP_GROUPEND
 };
@@ -42,6 +46,10 @@ void AC_CustomControl::init(void)
     switch (CustomControlType(_controller_type))
     {
         case CustomControlType::CONT_NONE:
+            break;
+        case CustomControlType::CONT_EMPTY:
+            _backend[get_type()] = new AC_CustomControl_Empty(*this, _ahrs, _atti_control, _motors, _dt);
+            _backend_var_info[get_type()] = AC_CustomControl_Empty::var_info;
             break;
         default:
             return;
