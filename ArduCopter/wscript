@@ -32,6 +32,7 @@ def build(bld):
             'AC_AutoTune',
             'AP_KDECAN',
             'AC_CustomControl',
+            'AC_ADRC'
         ],
     )
 
