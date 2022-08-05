@@ -8,13 +8,14 @@
 #include "AC_CustomControl_Empty.h"
 #include "AC_CustomControl_PID.h"
 #include "AC_CustomControl_INDI.h"
+#include "AC_CustomControl_ADRC.h"
 
 // table of user settable parameters
 const AP_Param::GroupInfo AC_CustomControl::var_info[] = {
     // @Param: CONT_TYPE
     // @DisplayName: Attitude control type
     // @Description: Attitude control type to be used
-    // @Values: 0:None, 1:Empty, 2:PID, 3:INDI
+    // @Values: 0:None, 1:Empty, 2:PID, 3:INDI, 4:ADRC
     // @RebootRequired: True
     // @User: Advanced
     AP_GROUPINFO_FLAGS("CONT_TYPE", 1, AC_CustomControl, _controller_type, 0, AP_PARAM_FLAG_ENABLE),
@@ -34,6 +35,9 @@ const AP_Param::GroupInfo AC_CustomControl::var_info[] = {
 
     // parameters for INDI controller
     AP_SUBGROUPVARPTR(_backend[2], "3_", 8, AC_CustomControl, _backend_var_info[2]),
+
+    // parameters for ADRC controller
+    AP_SUBGROUPVARPTR(_backend[3], "4_", 9, AC_CustomControl, _backend_var_info[3]),
 
     AP_GROUPEND
 };
@@ -66,6 +70,10 @@ void AC_CustomControl::init(void)
         case CustomControlType::CONT_INDI:
             _backend[get_type()] = new AC_CustomControl_INDI(*this, _ahrs, _atti_control, _motors, _dt);
             _backend_var_info[get_type()] = AC_CustomControl_INDI::var_info;
+            break;
+        case CustomControlType::CONT_ADRC:
+            _backend[get_type()] = new AC_CustomControl_ADRC(*this, _ahrs, _atti_control, _motors, _dt);
+            _backend_var_info[get_type()] = AC_CustomControl_ADRC::var_info;
             break;
         default:
             return;

@@ -17,7 +17,7 @@
 #if CUSTOMCONTROL_ENABLED
 
 #ifndef CUSTOMCONTROL_MAX_TYPES
-#define CUSTOMCONTROL_MAX_TYPES 3
+#define CUSTOMCONTROL_MAX_TYPES 4
 #endif
 
 class AC_CustomControl_Backend;
@@ -49,6 +49,7 @@ protected:
         CONT_EMPTY           = 1,
         CONT_PID             = 2,
         CONT_INDI            = 3,
+        CONT_ADRC            = 4,
     };            // controller that should be used     
 
     enum class  CustomControlOption {
